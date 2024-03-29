@@ -86,7 +86,16 @@ def upload_file():
             return redirect(request.host_url)
 def main() -> None:
     """Run the flask app."""
-    app.run(port=8080)
+    import sys
+    match len(sys.argv):
+        case 1:
+            port = 8080
+        case 2:
+            port = sys.argv[2]
+        case _:
+            print("too many command line arguments")
+            return
+    app.run(host='0.0.0.0',port=port)
 
 
 if __name__ == "__main__":
