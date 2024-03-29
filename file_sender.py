@@ -110,6 +110,7 @@ def main() -> None:
     parser.add_argument("-p", '--port', nargs=1, default=8080, type=int)
     parser.add_argument("-r", '--receive_folder', nargs=1,
                         default="received_files/", type=str)
+    parser.add_argument("-s", '--https', action='store_true')
     args = parser.parse_args()
     port = args.port[0] if isinstance(args.port, list) else args.port
     UPLOAD_FOLDER: str = args.receive_folder[0] if isinstance(
@@ -117,7 +118,10 @@ def main() -> None:
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     if not Path(UPLOAD_FOLDER).exists():
         Path(UPLOAD_FOLDER).mkdir()
-    app.run(host='0.0.0.0', port=port)
+    if args.https:
+        app.run(host='0.0.0.0', port=port,ssl_context='adhoc')
+    else:
+        app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == "__main__":
