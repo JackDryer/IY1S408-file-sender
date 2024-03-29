@@ -5,7 +5,8 @@ from werkzeug.utils import safe_join, secure_filename
 import os
 
 app: Flask = Flask(__name__)
-
+import logging
+log = logging.getLogger('werkzeug')
 UPLOAD_FOLDER = 'received_files/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -54,6 +55,7 @@ def html_ul_of_items(path:str) -> str:
 
 @app.route("/")  # type: ignore
 def serve_index() -> str:
+    log.setLevel(logging.ERROR) 
     return  html_ul_of_items("")+upload_form+ get_flash()
 
 @app.route("/explore/")
@@ -62,7 +64,6 @@ def redirect_to_main() -> str:
     return redirect("/")
 @app.route("/explore/<path:folder_path>") 
 def serve_path(folder_path: str) -> str:
-    print(folder_path)
     return html_ul_of_items(folder_path) +upload_form + get_flash()
 
 @app.route('/upload', methods=['POST'])
@@ -80,13 +81,19 @@ def upload_file():
             return redirect(request.host_url)
         if file:
             filename = secure_filename(file.filename)
-            t = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(t)
-            toflash.append("File uploaded successfully")
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            choice = input (f'A user wants to send a file "{filename}" Accept? y/\u0332N')
+            if choice.lower() == "y":
+                file.save(filepath)
+                print (f"Saving to {filepath}")
+                toflash.append("File uploaded successfully")
+            else:
+                toflash.append("File rejected")
             return redirect(request.host_url)
 def main() -> None:
     """Run the flask app."""
     import sys
+    
     match len(sys.argv):
         case 1:
             port = 8080
