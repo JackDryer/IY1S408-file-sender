@@ -10,7 +10,7 @@ log = logging.getLogger('werkzeug')
 UPLOAD_FOLDER = 'received_files/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-DIR_PATH: Path = Path(__file__).parent
+DIR_PATH: Path = Path.cwd()
 
 toflash :List[str] = [] # how to avoid template injection, dont use templates, 
 #however this should never contain user input due to xss
