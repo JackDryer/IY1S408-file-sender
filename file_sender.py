@@ -60,7 +60,7 @@ def html_ul_of_items(path: str) -> str:
 
 @app.route("/")  # type: ignore
 def serve_index() -> str:
-    log.setLevel(logging.ERROR)
+    log.setLevel(logging.ERROR) # dont log every get requests, but print the port and ip first
     return html_ul_of_items("")+upload_form + get_flash()
 
 
@@ -92,7 +92,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             choice = input(f'A user wants to send a file "{
-                           filename}" Accept? y/\u0332N')
+                           filename}" Accept? y/\u0332N') # \u0332 is used to underline the no option
             if choice.lower() == "y":
                 file.save(filepath)
                 print(f"Saving to {filepath}")
