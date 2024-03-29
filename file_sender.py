@@ -7,8 +7,6 @@ import os
 app: Flask = Flask(__name__)
 import logging
 log = logging.getLogger('werkzeug')
-UPLOAD_FOLDER = 'received_files/'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 DIR_PATH: Path = Path.cwd()
 
@@ -92,16 +90,17 @@ def upload_file():
             return redirect(request.host_url)
 def main() -> None:
     """Run the flask app."""
-    import sys
-    
-    match len(sys.argv):
-        case 1:
-            port = 8080
-        case 2:
-            port = sys.argv[1]
-        case _:
-            print("too many command line arguments")
-            return
+    import argparse
+    parser = argparse.ArgumentParser(prog='File Sender',
+                    description='Sends and receives files form the current working directory')
+    parser.add_argument("-p",'--port', nargs=1, default=8080, type=int)
+    parser.add_argument("-r",'--receive_folder', nargs=1, default="received_files/", type=str)
+    args = parser.parse_args()
+    port = args.port[0] if isinstance(args.port,list) else args.port
+    UPLOAD_FOLDER:str = args.receive_folder[0] if isinstance(args.receive_folder,list) else args.receive_folder
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    if not Path(UPLOAD_FOLDER).exists():
+        Path(UPLOAD_FOLDER).mkdir()
     app.run(host='0.0.0.0',port=port)
 
 
