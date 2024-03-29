@@ -19,50 +19,9 @@ def get_flash() ->str:
         temp+= toflash.pop()
     return temp
 
-drop_opener = """<div
-  id="drop_zone"
-  ondrop="dropHandler(event);"
-  ondragover="dragOverHandler(event);">
-  <style>
-#drop_zone {
-  border: 1px dashed red;
-  height:100%
-}
-</style>
-<script>
-function dropHandler(ev) {
-  console.log("File(s) dropped");
-
-  // Prevent default behavior (Prevent file from being opened)
-  ev.preventDefault();
-
-  if (ev.dataTransfer.items) {
-    // Use DataTransferItemList interface to access the file(s)
-    [...ev.dataTransfer.items].forEach((item, i) => {
-      // If dropped items aren't files, reject them
-      if (item.kind === "file") {
-        const file = item.getAsFile();
-        console.log(`… file[${i}].name = ${file.name}`);
-      }
-    });
-  } else {
-    // Use DataTransfer interface to access the file(s)
-    [...ev.dataTransfer.files].forEach((file, i) => {
-      console.log(`… file[${i}].name = ${file.name}`);
-    });
-  }
-}
-function dragOverHandler(ev) {
-  console.log("File(s) in drop zone");
-
-  // Prevent default behavior (Prevent file from being opened)
-  ev.preventDefault();
-}
-
-</script>"""
 upload_form =   """
 <form method=post action="/upload" enctype=multipart/form-data>
-      <input type=file name=file>
+      <input type=file name=file id=fileholder>
       <input type=submit value=Upload>
     </form>
 
@@ -95,7 +54,7 @@ def html_ul_of_items(path:str) -> str:
 
 @app.route("/")  # type: ignore
 def serve_index() -> str:
-    return  drop_opener+html_ul_of_items("")+upload_form+ get_flash()
+    return  html_ul_of_items("")+upload_form+ get_flash()
 
 @app.route("/explore/")
 @app.route("/explore") 
@@ -104,7 +63,7 @@ def redirect_to_main() -> str:
 @app.route("/explore/<path:folder_path>") 
 def serve_path(folder_path: str) -> str:
     print(folder_path)
-    return drop_opener+html_ul_of_items(folder_path) +upload_form + get_flash()
+    return html_ul_of_items(folder_path) +upload_form + get_flash()
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
