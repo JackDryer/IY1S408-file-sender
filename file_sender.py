@@ -1,6 +1,11 @@
+""" A simple flask app that can send over http or https
+
+Usage: pythone file_sender.py -p port (default  8080) -r folder_to_recive_into (default /received_files) -s (use https)
+
+"""
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Generator
 from flask import Flask, send_from_directory, request, redirect, url_for
 from werkzeug.utils import safe_join, secure_filename
 import os
@@ -30,7 +35,7 @@ upload_form = """
     """
 
 
-def get_files_from_directory(path):
+def get_files_from_directory(path :str) -> Generator:
     path = Path(safe_join(DIR_PATH, path))
     for dir_item in path.iterdir():
         if dir_item.is_file():
@@ -42,7 +47,7 @@ def get_files_from_directory(path):
 
 
 @app.route("/files/<path:file_name>")  # type: ignore
-def serve_file(file_name: str):
+def serve_file(file_name: str) -> str:
     return send_from_directory(DIR_PATH, file_name)
 
 
@@ -71,12 +76,15 @@ def redirect_to_main() -> str:
 
 
 @app.route("/explore/<path:folder_path>")
+
 def serve_path(folder_path: str) -> str:
+    """provides a view of the contents of a folder"""
     return html_ul_of_items(folder_path) + upload_form + get_flash()
 
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    """receives an uploded file and saves it if the user allows it"""
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
