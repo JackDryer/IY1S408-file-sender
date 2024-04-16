@@ -7,7 +7,7 @@ equivalent to: python file_sender.py --port 8080 --receive_folder --https --acce
 """
 import logging
 from pathlib import Path
-from typing import List, Generator, Literal
+from typing import List, Iterable, Literal, Tuple
 from flask import Flask, send_from_directory, request, redirect, url_for
 from werkzeug.utils import safe_join, secure_filename
 import os
@@ -40,7 +40,7 @@ upload_form = """
     """
 
 
-def get_files_from_directory(path :str) -> Generator[Literal["file","dir"], str]:
+def get_files_from_directory(path :str) -> Iterable[Tuple[Literal["file","dir"], str]]:
     """returns all a generator for every file and folder in the provided path 
     along with whether it is a file or folder
     
@@ -66,11 +66,11 @@ def html_ul_of_items(path: str) -> str:
     html: str = "<ul>"
     for item_type, dir_item in get_files_from_directory(path):
         if item_type == "file":
-            html += f"<li><a href='/files/{path}/{
-                dir_item}'>{dir_item}</a></li>"
+            html += f"""<li><a href='/files/{path}/{
+                dir_item}'>{dir_item}</a></li>"""
         if item_type == "dir":
-            html += f"<li><a href='/explore/{path}/{
-                dir_item}'>{dir_item}</a></li>"
+            html += f"""<li><a href='/explore/{path}/{
+                dir_item}'>{dir_item}</a></li>"""
     return f"{html}</ul>"
 
 
@@ -113,8 +113,8 @@ def upload_file()-> str:
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             if not app.config["accept_all_files"]:
-                choice = input(f'A user wants to send a file "{
-                           filename}" Accept? y/\u0332N') # \u0332 is used to underline the no option
+                choice = input(f'''A user wants to send a file "{
+                           filename}" Accept? y/\u0332N''') # \u0332 is used to underline the no option
             else:
                 choice = "y"
             if choice.lower() == "y":
@@ -142,9 +142,10 @@ def main() -> None:
         args.receive_folder, list) else args.receive_folder
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config["accept_all_files"] = args.accept_all_files
-    print(args.accept_all_files)
     if not Path(UPLOAD_FOLDER).exists():
         Path(UPLOAD_FOLDER).mkdir()
+    from socket import gethostname
+    print(f"hostname: {gethostname()}")
     if args.https:
         app.run(host='0.0.0.0', port=port,ssl_context='adhoc')
     else:
